@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "@/styles/rush-layout.css";
 import ParticleBackground from "@/components/ParticleBackground";
 import RushCard from "@/components/RushCard";
 import TournamentHeader from "@/components/TournamentHeader";
@@ -36,6 +37,17 @@ const buyIns = [
   { buyIn: 50, timeLeft: "00:42", prizePool: 100000 },
   { buyIn: 100, timeLeft: "00:42", prizePool: 150000 },
   { buyIn: 200, timeLeft: "00:42", prizePool: 200000 },
+];
+
+const gameImages = [
+  { image: "/gameImages/anubiswildhunt.png", name: "Anubis Wild Hunt" },
+  { image: "/gameImages/candybonanza1000.png", name: "Candy Bonanza 1000" },
+  { image: "/gameImages/dragonVsTigerMegaways.png", name: "Dragon Vs Tiger" },
+  { image: "/gameImages/falconofanatolia.png", name: "Falcon of Anatolia" },
+  { image: "/gameImages/fortunefrog.png", name: "Fortune Frog" },
+  { image: "/gameImages/garudaVsNagaMegaways.png", name: "Garuda Vs Naga" },
+  { image: "/gameImages/goldenphoenixblaze.png", name: "Golden Phoenix Blaze" },
+  { image: "/gameImages/islandoftreasures.png", name: "Island of Treasures" },
 ];
 
 type View = "rush" | "tournament";
@@ -86,28 +98,18 @@ const Index = () => {
 
         {/* Rush Cards View */}
         {view === "rush" && (
-          <div className="flex-1 min-h-0 flex flex-col sm:flex-row items-stretch justify-center gap-1.5 sm:gap-4 lg:gap-6 px-2 sm:px-4 pb-1 sm:pb-4 w-full max-w-7xl mx-auto overflow-hidden">
-            <RushCard
-              minutes={1}
-              variant="blue"
-              initialSeconds={34}
-              jackpot={10000}
-              leaderboard={leaderboardData}
-            />
-            <RushCard
-              minutes={2}
-              variant="red"
-              initialSeconds={75}
-              jackpot={10000}
-              leaderboard={leaderboardData}
-            />
-            <RushCard
-              minutes={5}
-              variant="emerald"
-              initialSeconds={130}
-              jackpot={10000}
-              leaderboard={leaderboardData}
-            />
+          <div className="rush-scroll">
+            <div className="rush-grid">
+              <div className="rush-card-wrap">
+                <RushCard minutes={1} variant="blue" initialSeconds={34} jackpot={10000} leaderboard={leaderboardData} />
+              </div>
+              <div className="rush-card-wrap">
+                <RushCard minutes={2} variant="red" initialSeconds={75} jackpot={10000} leaderboard={leaderboardData} />
+              </div>
+              <div className="rush-card-wrap">
+                <RushCard minutes={5} variant="emerald" initialSeconds={130} jackpot={10000} leaderboard={leaderboardData} />
+              </div>
+            </div>
           </div>
         )}
 
@@ -128,8 +130,8 @@ const Index = () => {
 
                 {/* Game slots grid */}
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <GameSlot key={i} />
+                  {gameImages.map((g) => (
+                    <GameSlot key={g.name} image={g.image} name={g.name} />
                   ))}
                 </div>
               </div>

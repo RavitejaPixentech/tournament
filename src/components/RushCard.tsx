@@ -94,12 +94,12 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
           <div className="rounded-[8px] sm:rounded-[11px] p-[1px] sm:p-[3px] bg-gradient-to-b from-yellow-600/80 via-yellow-500/40 to-yellow-600/80 flex-1 flex flex-col min-h-0">
             <div className={`rounded-lg overflow-hidden ${styles.cardBg} flex flex-col flex-1 min-h-0`}>
               {/* Header */}
-              <div className={`bg-gradient-to-b ${styles.headerBg} px-2 sm:px-5 pt-1.5 sm:pt-7 pb-1 sm:pb-5 text-center relative overflow-hidden flex-shrink-0`}>
+              <div className={`bg-gradient-to-b ${styles.headerBg} px-5 sm:px-5 pt-6 sm:pt-7 pb-4 sm:pb-5 text-center relative overflow-hidden flex-shrink-0`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
                 <div className="relative z-10">
-                  <div className="flex items-baseline justify-center gap-0.5 sm:gap-1">
+                  <div className="flex items-baseline justify-center gap-1">
                     <span
-                      className="text-2xl sm:text-5xl lg:text-7xl font-black text-gold italic drop-shadow-lg"
+                      className="text-5xl sm:text-5xl lg:text-7xl font-black text-gold italic drop-shadow-lg"
                       style={{
                         WebkitTextStroke: '1px rgba(0,0,0,0.4)',
                         textShadow: '0 0 30px rgba(255,200,0,0.5), 3px 3px 6px rgba(0,0,0,0.6)'
@@ -109,13 +109,13 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
                     </span>
                     <div className="flex flex-col items-start">
                       <span
-                        className="text-[10px] sm:text-lg lg:text-2xl font-black text-foreground tracking-wider uppercase leading-tight"
+                        className="text-lg sm:text-lg lg:text-2xl font-black text-foreground tracking-wider uppercase leading-tight"
                         style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}
                       >
                         Minute
                       </span>
                       <span
-                        className="text-base sm:text-3xl lg:text-5xl font-black text-gold tracking-wider uppercase -mt-0.5 sm:-mt-2 drop-shadow-lg leading-tight"
+                        className="text-3xl sm:text-3xl lg:text-5xl font-black text-gold tracking-wider uppercase -mt-2 drop-shadow-lg leading-tight"
                         style={{
                           WebkitTextStroke: '1px rgba(0,0,0,0.3)',
                           textShadow: '0 0 20px rgba(255,200,0,0.4), 3px 3px 6px rgba(0,0,0,0.6)'
@@ -125,48 +125,48 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
                       </span>
                     </div>
                   </div>
-                  <p className="text-[7px] sm:text-xs font-bold tracking-[0.15em] sm:tracking-[0.3em] uppercase text-gold-light mt-0.5 sm:mt-2">
+                  <p className="text-xs font-bold tracking-[0.3em] uppercase text-gold-light mt-2">
                     Lighting Fast Action!
                   </p>
                 </div>
               </div>
 
               {/* Timer */}
-              <div className={`mx-1 sm:mx-4 mt-1 sm:mt-3 rounded-md sm:rounded-lg ${styles.timerBg} border px-1.5 sm:px-4 py-0.5 sm:py-2.5 flex items-center justify-center gap-1 sm:gap-3 flex-shrink-0`}>
-                <Timer className="w-2.5 h-2.5 sm:w-5 sm:h-5 text-gold-light" />
-                <span className={`text-[8px] sm:text-sm ${styles.timerText} font-medium`}>Starts in</span>
-                <span className="text-xs sm:text-xl lg:text-2xl font-mono font-black text-foreground tracking-widest">
+              <div className={`mx-4 mt-3 rounded-lg ${styles.timerBg} border px-4 py-2.5 flex items-center justify-center gap-3 flex-shrink-0`}>
+                <Timer className="w-5 h-5 text-gold-light" />
+                <span className={`text-sm ${styles.timerText} font-medium`}>Starts in</span>
+                <span className="text-xl lg:text-2xl font-mono font-black text-foreground tracking-widest">
                   {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
                 </span>
               </div>
 
               {/* Center image area - flexible height */}
-              <div className={`min-h-[2rem] sm:min-h-[3rem] flex-1 mx-1 sm:mx-4 mt-1 sm:mt-3 rounded-md sm:rounded-lg bg-gradient-to-b ${styles.imageBg} flex items-center justify-center overflow-hidden relative`}>
+              <div className={`min-h-[5rem] flex-1 mx-4 mt-3 rounded-lg bg-gradient-to-b ${styles.imageBg} flex items-center justify-center overflow-hidden relative`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                <div className="text-2xl sm:text-5xl lg:text-6xl animate-float relative z-10">{cardEmojis[variant]}</div>
+                <div className="text-5xl lg:text-6xl animate-float relative z-10">{cardEmojis[variant]}</div>
               </div>
 
               {/* Jackpot banner */}
-              <div className={`mx-1 sm:mx-4 mt-1 sm:mt-3 bg-gradient-to-r ${styles.jackpotBg} rounded-md sm:rounded-lg py-0.5 sm:py-3 px-1.5 sm:px-5 flex items-center justify-center gap-1.5 sm:gap-4 shadow-lg relative overflow-hidden flex-shrink-0`}>
+              <div className={`mx-4 mt-3 bg-gradient-to-r ${styles.jackpotBg} rounded-lg py-3 px-5 flex items-center justify-center gap-4 shadow-lg relative overflow-hidden flex-shrink-0`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-                <Star className="w-2.5 h-2.5 sm:w-6 sm:h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
+                <Star className="w-6 h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
                 <div className="text-center relative z-10">
-                  <p className={`text-[6px] sm:text-[10px] font-black uppercase tracking-[0.15em] sm:tracking-[0.3em] ${styles.jackpotLabel}`}>Jackpot</p>
-                  <p className={`text-sm sm:text-2xl lg:text-3xl font-black ${styles.jackpotText} drop-shadow-md -mt-0.5`}
+                  <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${styles.jackpotLabel}`}>Jackpot</p>
+                  <p className={`text-2xl lg:text-3xl font-black ${styles.jackpotText} drop-shadow-md -mt-0.5`}
                     style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}
                   >
                     {formatScore(jackpot)}
                   </p>
                 </div>
-                <Star className="w-2.5 h-2.5 sm:w-6 sm:h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
+                <Star className="w-6 h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
               </div>
 
               {/* Leaderboard */}
-              <div className={`mx-1 sm:mx-4 mt-1 sm:mt-3 rounded-md sm:rounded-lg bg-gradient-to-b ${styles.leaderBg} overflow-hidden border ${styles.leaderBorder} flex-shrink-0`}>
+              <div className={`mx-4 mt-3 rounded-lg bg-gradient-to-b ${styles.leaderBg} overflow-hidden border ${styles.leaderBorder} flex-shrink-0`}>
                 {leaderboard.map((player, i) => (
                   <div
                     key={player.name}
-                    className={`flex items-center justify-between px-1.5 sm:px-4 py-px sm:py-2 text-[8px] sm:text-sm ${
+                    className={`flex items-center justify-between px-4 py-2 text-sm ${
                       i % 2 === 0 ? styles.leaderStripe : ""
                     }`}
                   >
@@ -181,9 +181,9 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
               </div>
 
               {/* Join Button */}
-              <div className="p-1 sm:p-4 flex-shrink-0">
+              <div className="p-4 flex-shrink-0">
                 <button
-                  className={`w-full bg-gradient-to-b ${styles.joinBtn} font-black text-[10px] sm:text-lg lg:text-xl uppercase tracking-wider sm:tracking-widest py-1 sm:py-3.5 rounded-md sm:rounded-xl shadow-lg transition-all active:scale-95 border sm:border-2`}
+                  className={`w-full bg-gradient-to-b ${styles.joinBtn} font-black text-lg lg:text-xl uppercase tracking-widest py-3.5 rounded-xl shadow-lg transition-all active:scale-95 border-2`}
                   style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}
                 >
                   Join Now

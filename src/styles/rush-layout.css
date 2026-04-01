@@ -1,0 +1,78 @@
+.rush-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+  width: 100%;
+}
+
+.rush-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+
+.rush-card-wrap {
+  width: 100%;
+  /* Mobile portrait: each card takes natural content height, scrollable */
+  min-height: 600px;
+}
+
+/* Tablet portrait (2 cols, 3rd card centered) */
+@media (min-width: 640px) and (orientation: portrait) {
+  .rush-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .rush-card-wrap:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* Landscape phones & small tablets: 2 cols x 2 rows, cards are clearly visible */
+@media (orientation: landscape) and (max-width: 1023px) {
+  .rush-scroll {
+    padding: 8px 16px 16px;
+  }
+  .rush-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+    gap: 12px;
+  }
+  .rush-card-wrap {
+    min-height: calc(100vh - 60px);
+  }
+  .rush-card-wrap:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 50%;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* Desktop (3 cols, fit in viewport) */
+@media (min-width: 1024px) {
+  .rush-scroll {
+    display: flex;
+    align-items: center;
+  }
+  .rush-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .rush-card-wrap {
+    min-height: 0;
+    height: calc(100vh - 8rem);
+  }
+  .rush-card-wrap:nth-child(3) {
+    grid-column: auto;
+    max-width: none;
+    margin: 0;
+  }
+}
