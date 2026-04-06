@@ -72,8 +72,6 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
   const wrapRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const sizerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [naturalH, setNaturalH] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,46 +84,50 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
     const card = cardRef.current;
-    if (!wrap || !card) return;
+    const sizer = sizerRef.current;
+    if (!wrap || !card || !sizer) return;
 
     const update = () => {
       // transform: scale() does NOT affect scrollHeight, so this is always the natural height
       const nh = card.scrollHeight;
       if (nh <= 0) return;
-      setNaturalH(nh);
 
-      // Temporarily collapse the sizer so we measure the true available space,
-      // avoiding a negative feedback loop where scaled height restricts container height.
-      const sizer = sizerRef.current;
-      const oldH = sizer ? sizer.style.height : "auto";
-      if (sizer) sizer.style.height = "0px";
+      // Temporarily collapse the sizer so we measure the true available space
+      const oldH = sizer.style.height;
+      sizer.style.height = "0px";
 
       const wW = wrap.clientWidth;
       const wH = wrap.clientHeight;
 
-      // Restore sizer height
-      if (sizer) sizer.style.height = oldH;
-
-      if (wW <= 0) return;
+      if (wW <= 0) {
+        sizer.style.height = oldH;
+        return;
+      }
 
       const sx = wW / DESIGN_WIDTH;
-      // If setting sizer to 0 drops container height to 0, there's no fixed height constraint.
       let sy = sx;
       if (wH > 0) {
         sy = wH / nh;
       } else {
-        // Fallback for unconstrained vertical height (like the scrollable list on phones).
-        // Ensure a single card comfortably fits within the screen height (e.g., max 85% of viewport).
         const maxViewportH = window.innerHeight * 0.85;
         sy = maxViewportH / nh;
       }
       
-      setScale(Math.min(sx, sy));
+      const newScale = Math.min(sx, sy);
+
+      // Direct DOM manipulation bypasses React render lag, making resizing ultra-smooth!
+      card.style.transform = `scale(${newScale})`;
+      sizer.style.width = `${DESIGN_WIDTH * newScale}px`;
+      sizer.style.height = `${nh * newScale}px`;
     };
 
     const ro = new ResizeObserver(update);
     ro.observe(wrap);
+    ro.observe(card); // Catch internal updates like leaderboard changes
+    
+    // Initial run
     requestAnimationFrame(update);
+    
     return () => ro.disconnect();
   }, []);
 
@@ -135,16 +137,12 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
   return (
     <div ref={wrapRef} className="rush-card-wrapper">
       {/* Sizer: takes the scaled dimensions so parent layout flows correctly */}
-      <div ref={sizerRef} className="rush-card-sizer" style={{
-        width: DESIGN_WIDTH * scale,
-        height: naturalH > 0 ? naturalH * scale : "auto",
-      }}>
+      <div ref={sizerRef} className="rush-card-sizer">
         {/* Card at fixed design width, scaled via transform */}
         <div
           ref={cardRef}
           style={{
             width: DESIGN_WIDTH,
-            transform: `scale(${scale})`,
             transformOrigin: "top left",
             position: "absolute",
             top: 0,
