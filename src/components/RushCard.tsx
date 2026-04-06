@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Timer, Star } from "lucide-react";
 
 interface RushCardProps {
@@ -60,19 +60,20 @@ const variantStyles = {
   },
 };
 
-const cardEmojis = {
-  blue: "🎲",
-  red: "🎰",
-  emerald: "💎",
-};
+const cardEmojis = { blue: "🎲", red: "🎰", emerald: "💎" };
 
-const formatScore = (score: number) => {
-  return score.toLocaleString("de-DE");
-};
+const formatScore = (score: number) => score.toLocaleString("de-DE");
+
+const DESIGN_WIDTH = 380;
 
 const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: RushCardProps) => {
   const [seconds, setSeconds] = useState(initialSeconds);
   const styles = variantStyles[variant];
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const sizerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [naturalH, setNaturalH] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -81,113 +82,170 @@ const RushCard = ({ minutes, variant, initialSeconds, jackpot, leaderboard }: Ru
     return () => clearInterval(interval);
   }, [initialSeconds]);
 
+  // Scaling: measure container, compute uniform scale for width + height
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const card = cardRef.current;
+    if (!wrap || !card) return;
+
+    const update = () => {
+      // transform: scale() does NOT affect scrollHeight, so this is always the natural height
+      const nh = card.scrollHeight;
+      if (nh <= 0) return;
+      setNaturalH(nh);
+
+      // Temporarily collapse the sizer so we measure the true available space,
+      // avoiding a negative feedback loop where scaled height restricts container height.
+      const sizer = sizerRef.current;
+      const oldH = sizer ? sizer.style.height : "auto";
+      if (sizer) sizer.style.height = "0px";
+
+      const wW = wrap.clientWidth;
+      const wH = wrap.clientHeight;
+
+      // Restore sizer height
+      if (sizer) sizer.style.height = oldH;
+
+      if (wW <= 0) return;
+
+      const sx = wW / DESIGN_WIDTH;
+      // If setting sizer to 0 drops container height to 0, there's no fixed height constraint.
+      let sy = sx;
+      if (wH > 0) {
+        sy = wH / nh;
+      } else {
+        // Fallback for unconstrained vertical height (like the scrollable list on phones).
+        // Ensure a single card comfortably fits within the screen height (e.g., max 85% of viewport).
+        const maxViewportH = window.innerHeight * 0.85;
+        sy = maxViewportH / nh;
+      }
+      
+      setScale(Math.min(sx, sy));
+    };
+
+    const ro = new ResizeObserver(update);
+    ro.observe(wrap);
+    requestAnimationFrame(update);
+    return () => ro.disconnect();
+  }, []);
+
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
 
   return (
-    <div className="rush-card-unit">
-      {/* Outer ornate gold border */}
-      <div className={`rounded-xl sm:rounded-2xl p-[2px] sm:p-[5px] bg-gradient-to-b ${styles.outerBorder} shadow-2xl shadow-yellow-900/50`}>
-        {/* Inner colored accent border */}
-        <div className={`rounded-[9px] sm:rounded-[13px] p-[2px] sm:p-[3px] bg-gradient-to-b ${styles.innerBorder}`}>
-          {/* Gold inner trim */}
-          <div className="rounded-[8px] sm:rounded-[11px] p-[1px] sm:p-[3px] bg-gradient-to-b from-yellow-600/80 via-yellow-500/40 to-yellow-600/80">
-            <div className={`rounded-lg overflow-hidden ${styles.cardBg}`}>
-              {/* Header */}
-              <div className={`bg-gradient-to-b ${styles.headerBg} px-5 pt-5 sm:pt-7 pb-3 sm:pb-5 text-center relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
-                <div className="relative z-10">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span
-                      className="text-5xl sm:text-7xl font-black text-gold italic drop-shadow-lg"
-                      style={{
-                        WebkitTextStroke: '1px rgba(0,0,0,0.4)',
-                        textShadow: '0 0 30px rgba(255,200,0,0.5), 3px 3px 6px rgba(0,0,0,0.6)'
-                      }}
-                    >
-                      {minutes}
-                    </span>
-                    <div className="flex flex-col items-start">
-                      <span
-                        className="text-lg sm:text-2xl font-black text-foreground tracking-wider uppercase leading-tight"
-                        style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}
-                      >
-                        Minute
-                      </span>
-                      <span
-                        className="text-3xl sm:text-5xl font-black text-gold tracking-wider uppercase -mt-1 sm:-mt-2 drop-shadow-lg leading-tight"
-                        style={{
-                          WebkitTextStroke: '1px rgba(0,0,0,0.3)',
-                          textShadow: '0 0 20px rgba(255,200,0,0.4), 3px 3px 6px rgba(0,0,0,0.6)'
-                        }}
-                      >
-                        Rush
-                      </span>
+    <div ref={wrapRef} className="rush-card-wrapper">
+      {/* Sizer: takes the scaled dimensions so parent layout flows correctly */}
+      <div ref={sizerRef} className="rush-card-sizer" style={{
+        width: DESIGN_WIDTH * scale,
+        height: naturalH > 0 ? naturalH * scale : "auto",
+      }}>
+        {/* Card at fixed design width, scaled via transform */}
+        <div
+          ref={cardRef}
+          style={{
+            width: DESIGN_WIDTH,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        >
+          {/* Outer ornate gold border */}
+          <div className={`rounded-2xl p-[5px] bg-gradient-to-b ${styles.outerBorder} shadow-2xl shadow-yellow-900/50`}>
+            {/* Inner colored accent border */}
+            <div className={`rounded-[13px] p-[3px] bg-gradient-to-b ${styles.innerBorder}`}>
+              {/* Gold inner trim */}
+              <div className="rounded-[11px] p-[3px] bg-gradient-to-b from-yellow-600/80 via-yellow-500/40 to-yellow-600/80">
+                <div className={`rounded-lg overflow-hidden ${styles.cardBg}`}>
+                  {/* Header */}
+                  <div className={`bg-gradient-to-b ${styles.headerBg} px-5 pt-7 pb-5 text-center relative overflow-hidden`}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/5" />
+                    <div className="relative z-10">
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span
+                          className="text-7xl font-black text-gold italic drop-shadow-lg"
+                          style={{
+                            WebkitTextStroke: '1px rgba(0,0,0,0.4)',
+                            textShadow: '0 0 30px rgba(255,200,0,0.5), 3px 3px 6px rgba(0,0,0,0.6)'
+                          }}
+                        >
+                          {minutes}
+                        </span>
+                        <div className="flex flex-col items-start">
+                          <span className="text-2xl font-black text-foreground tracking-wider uppercase leading-tight"
+                            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}>
+                            Minute
+                          </span>
+                          <span className="text-5xl font-black text-gold tracking-wider uppercase -mt-2 drop-shadow-lg leading-tight"
+                            style={{
+                              WebkitTextStroke: '1px rgba(0,0,0,0.3)',
+                              textShadow: '0 0 20px rgba(255,200,0,0.4), 3px 3px 6px rgba(0,0,0,0.6)'
+                            }}>
+                            Rush
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs font-bold tracking-[0.3em] uppercase text-gold-light mt-2">
+                        Lighting Fast Action!
+                      </p>
                     </div>
                   </div>
-                  <p className="text-xs font-bold tracking-[0.3em] uppercase text-gold-light mt-1 sm:mt-2">
-                    Lighting Fast Action!
-                  </p>
-                </div>
-              </div>
 
-              {/* Timer */}
-              <div className={`mx-3 sm:mx-4 mt-2 sm:mt-3 rounded-lg ${styles.timerBg} border px-3 sm:px-4 py-1.5 sm:py-2.5 flex items-center justify-center gap-2 sm:gap-3`}>
-                <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-gold-light" />
-                <span className={`text-xs sm:text-sm ${styles.timerText} font-medium`}>Starts in</span>
-                <span className="text-lg sm:text-2xl font-mono font-black text-foreground tracking-widest">
-                  {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
-                </span>
-              </div>
-
-              {/* Center image area */}
-              <div className={`rush-card-image mx-3 sm:mx-4 mt-2 sm:mt-3 rounded-lg bg-gradient-to-b ${styles.imageBg} flex items-center justify-center overflow-hidden relative`}>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                <div className="text-4xl sm:text-6xl animate-float relative z-10">{cardEmojis[variant]}</div>
-              </div>
-
-              {/* Jackpot banner */}
-              <div className={`mx-3 sm:mx-4 mt-2 sm:mt-3 bg-gradient-to-r ${styles.jackpotBg} rounded-lg py-2 sm:py-3 px-4 sm:px-5 flex items-center justify-center gap-3 sm:gap-4 shadow-lg relative overflow-hidden`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
-                <div className="text-center relative z-10">
-                  <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${styles.jackpotLabel}`}>Jackpot</p>
-                  <p className={`text-2xl sm:text-3xl font-black ${styles.jackpotText} drop-shadow-md -mt-0.5`}
-                    style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}
-                  >
-                    {formatScore(jackpot)}
-                  </p>
-                </div>
-                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
-              </div>
-
-              {/* Leaderboard */}
-              <div className={`mx-3 sm:mx-4 mt-2 sm:mt-3 rounded-lg bg-gradient-to-b ${styles.leaderBg} overflow-hidden border ${styles.leaderBorder}`}>
-                {leaderboard.map((player, i) => (
-                  <div
-                    key={player.name}
-                    className={`flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm ${
-                      i % 2 === 0 ? styles.leaderStripe : ""
-                    }`}
-                  >
-                    <span className="text-gray-200 font-semibold truncate">
-                      {i + 1}. {player.name}
-                    </span>
-                    <span className="font-bold text-yellow-300 ml-1">
-                      {formatScore(player.score)}
+                  {/* Timer */}
+                  <div className={`mx-4 mt-3 rounded-lg ${styles.timerBg} border px-4 py-2.5 flex items-center justify-center gap-3`}>
+                    <Timer className="w-5 h-5 text-gold-light" />
+                    <span className={`text-sm ${styles.timerText} font-medium`}>Starts in</span>
+                    <span className="text-2xl font-mono font-black text-foreground tracking-widest">
+                      {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
                     </span>
                   </div>
-                ))}
-              </div>
 
-              {/* Join Button */}
-              <div className="p-3 sm:p-4">
-                <button
-                  className={`w-full bg-gradient-to-b ${styles.joinBtn} font-black text-base sm:text-xl uppercase tracking-widest py-2.5 sm:py-3.5 rounded-xl shadow-lg transition-all active:scale-95 border-2`}
-                  style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}
-                >
-                  Join Now
-                </button>
+                  {/* Center image area */}
+                  <div className={`mx-4 mt-3 rounded-lg bg-gradient-to-b ${styles.imageBg} flex items-center justify-center overflow-hidden relative`}
+                    style={{ height: 100 }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <div className="text-6xl animate-float relative z-10">{cardEmojis[variant]}</div>
+                  </div>
+
+                  {/* Jackpot banner */}
+                  <div className={`mx-4 mt-3 bg-gradient-to-r ${styles.jackpotBg} rounded-lg py-3 px-5 flex items-center justify-center gap-4 shadow-lg relative overflow-hidden`}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                    <Star className="w-6 h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
+                    <div className="text-center relative z-10">
+                      <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${styles.jackpotLabel}`}>Jackpot</p>
+                      <p className={`text-3xl font-black ${styles.jackpotText} drop-shadow-md -mt-0.5`}
+                        style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
+                        {formatScore(jackpot)}
+                      </p>
+                    </div>
+                    <Star className="w-6 h-6 text-yellow-300 fill-yellow-300 drop-shadow-md relative z-10" />
+                  </div>
+
+                  {/* Leaderboard */}
+                  <div className={`mx-4 mt-3 rounded-lg bg-gradient-to-b ${styles.leaderBg} overflow-hidden border ${styles.leaderBorder}`}>
+                    {leaderboard.map((player, i) => (
+                      <div key={player.name}
+                        className={`flex items-center justify-between px-4 py-2 text-sm ${i % 2 === 0 ? styles.leaderStripe : ""}`}>
+                        <span className="text-gray-200 font-semibold truncate">
+                          {i + 1}. {player.name}
+                        </span>
+                        <span className="font-bold text-yellow-300 ml-1">
+                          {formatScore(player.score)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Join Button */}
+                  <div className="p-4">
+                    <button
+                      className={`w-full bg-gradient-to-b ${styles.joinBtn} font-black text-xl uppercase tracking-widest py-3.5 rounded-xl shadow-lg transition-all active:scale-95 border-2`}
+                      style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>
+                      Join Now
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -1,24 +1,32 @@
-/* ─── Rush Card: Single Unit Layout ─── */
+/* ─── Rush Card: Single Unit + Auto-Fit Layout ─── */
 
 /*
-  Each RushCard is a single atomic unit (rush-card-unit).
-  It never stretches or compresses — it renders at its
-  natural content size. The grid scrolls if cards don't fit.
+  Cards render at a fixed 380px design width and use
+  transform: scale() to fit both width AND height of
+  their container. The entire card scales as one unit.
+
+  Height chain on landscape/desktop:
+  h-screen → flex-col → flex-1 (rush-scroll) → rush-grid (100%) → rush-card-wrap (100%)
 */
 
-/* The card unit: fixed intrinsic size, no flex-grow */
-.rush-card-unit {
+/* Wrapper inside each card: centers the scaled sizer */
+.rush-card-wrapper {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-/* Image area: fixed height so it never collapses */
-.rush-card-image {
-  height: 80px;
+/* Sizer: collapses to the card's scaled dimensions */
+.rush-card-sizer {
+  position: relative;
+  flex-shrink: 0;
 }
 
-/* ─── Scroll container ─── */
+/* ─── Scroll container (portrait mobile default) ─── */
 .rush-scroll {
-  flex: 1;
+  flex: 1 1 0%;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -26,10 +34,10 @@
   width: 100%;
 }
 
-/* ─── Grid Layouts ─── */
+/* ─── Grid ─── */
 .rush-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   width: 100%;
   max-width: 1400px;
@@ -39,60 +47,58 @@
 
 .rush-card-wrap {
   width: 100%;
+  min-width: 0;
 }
 
-/* ─── Responsive Breakpoints ─── */
-
-/* Tablet portrait (2 cols, 3rd card centered) */
-@media (min-width: 640px) and (orientation: portrait) {
-  .rush-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .rush-card-wrap:nth-child(3) {
-    grid-column: 1 / -1;
-    max-width: 50%;
-    margin: 0 auto;
-    width: 100%;
-  }
-}
-
-/* Landscape phones & small tablets: 2 cols */
-@media (orientation: landscape) and (max-width: 1023px) {
+/* ─── Tablet Portrait: 2 columns, 2 rows, fit viewport ─── */
+@media (min-width: 500px) and (max-width: 1023px) and (orientation: portrait) {
   .rush-scroll {
-    padding: 8px 16px 16px;
-  }
-  .rush-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .rush-card-wrap:nth-child(3) {
-    grid-column: 1 / -1;
-    max-width: 50%;
-    margin: 0 auto;
-    width: 100%;
-  }
-  .rush-card-image {
-    height: 60px;
-  }
-}
-
-/* Desktop (3 cols) */
-@media (min-width: 1024px) {
-  .rush-scroll {
+    overflow: hidden;
+    padding: 8px 16px;
     display: flex;
-    align-items: flex-start;
-    padding-top: 8px;
+    flex-direction: column;
   }
   .rush-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, 1fr);
+    gap: 16px;
+    flex: 1 1 0%;
+    min-height: 0;
+    padding: 0;
+  }
+  .rush-card-wrap {
+    height: 100%;
+    min-height: 0;
   }
   .rush-card-wrap:nth-child(3) {
-    grid-column: auto;
-    max-width: none;
-    margin: 0;
+    grid-column: 1 / -1;
   }
-  .rush-card-image {
-    height: 120px;
+  .rush-card-wrapper {
+    height: 100%;
+  }
+}
+
+/* ─── Landscape & Desktop: 3 columns, fill viewport, no scroll ─── */
+@media (orientation: landscape), (min-width: 1024px) {
+  .rush-scroll {
+    overflow: hidden;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .rush-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: 1fr;
+    gap: 24px;
+    flex: 1 1 0%;
+    min-height: 0;
+    padding: 0;
+  }
+  .rush-card-wrap {
+    height: 100%;
+    min-height: 0;
+  }
+  .rush-card-wrapper {
+    height: 100%;
   }
 }
