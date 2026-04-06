@@ -1,11 +1,32 @@
+/* ─── Rush Card: Single Unit Layout ─── */
+
+/*
+  Each RushCard is a single atomic unit (rush-card-unit).
+  It never stretches or compresses — it renders at its
+  natural content size. The grid scrolls if cards don't fit.
+*/
+
+/* The card unit: fixed intrinsic size, no flex-grow */
+.rush-card-unit {
+  width: 100%;
+}
+
+/* Image area: fixed height so it never collapses */
+.rush-card-image {
+  height: 80px;
+}
+
+/* ─── Scroll container ─── */
 .rush-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0 12px 12px;
   width: 100%;
 }
 
+/* ─── Grid Layouts ─── */
 .rush-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -18,9 +39,9 @@
 
 .rush-card-wrap {
   width: 100%;
-  /* Mobile portrait: each card takes natural content height, scrollable */
-  min-height: 600px;
 }
+
+/* ─── Responsive Breakpoints ─── */
 
 /* Tablet portrait (2 cols, 3rd card centered) */
 @media (min-width: 640px) and (orientation: portrait) {
@@ -35,18 +56,14 @@
   }
 }
 
-/* Landscape phones & small tablets: 2 cols x 2 rows, cards are clearly visible */
+/* Landscape phones & small tablets: 2 cols */
 @media (orientation: landscape) and (max-width: 1023px) {
   .rush-scroll {
     padding: 8px 16px 16px;
   }
   .rush-grid {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto;
     gap: 12px;
-  }
-  .rush-card-wrap {
-    min-height: calc(100vh - 60px);
   }
   .rush-card-wrap:nth-child(3) {
     grid-column: 1 / -1;
@@ -54,25 +71,28 @@
     margin: 0 auto;
     width: 100%;
   }
+  .rush-card-image {
+    height: 60px;
+  }
 }
 
-/* Desktop (3 cols, fit in viewport) */
+/* Desktop (3 cols) */
 @media (min-width: 1024px) {
   .rush-scroll {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 8px;
   }
   .rush-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
-  .rush-card-wrap {
-    min-height: 0;
-    height: calc(100vh - 8rem);
-  }
   .rush-card-wrap:nth-child(3) {
     grid-column: auto;
     max-width: none;
     margin: 0;
+  }
+  .rush-card-image {
+    height: 120px;
   }
 }
