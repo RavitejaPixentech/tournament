@@ -70,4 +70,58 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Thin Global Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  /* Always transparent in idle */
+  ::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-button {
+    background: transparent;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Scrollbar arrow buttons */
+  ::-webkit-scrollbar-button {
+    height: 14px;
+    background-size: 8px;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  
+  /* ONLY visible when Javascript adds is-scrolling, or when hovering the scrollbar explicitly */
+  .is-scrolling::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* UP Arrow for Top Button when scrolling */
+  .is-scrolling::-webkit-scrollbar-button:vertical:decrement {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 15l-6-6-6 6'/%3E%3C/svg%3E");
+    background-color: transparent !important;
+  }
+
+  /* DOWN Arrow for Bottom Button when scrolling */
+  .is-scrolling::-webkit-scrollbar-button:vertical:increment {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-color: transparent !important;
+  }
+  
+  /* Even brighter when hovered or dragged */
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.4) !important;
+  }
+  
+  ::-webkit-scrollbar-button:hover,
+  ::-webkit-scrollbar-button:active {
+    background-color: transparent !important;
+  }
 }

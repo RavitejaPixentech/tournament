@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import "@/styles/rush-layout.css";
 import ParticleBackground from "@/components/ParticleBackground";
 import RushCard from "@/components/RushCard";
@@ -55,6 +55,19 @@ type View = "rush" | "tournament";
 const Index = () => {
   const [view, setView] = useState<View>("rush");
   const [tournamentMinutes, setTournamentMinutes] = useState(5);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Magic Javascript hook to make scrollbar visible ONLY while scrolling
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    target.classList.add('is-scrolling');
+    
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    
+    scrollTimeout.current = setTimeout(() => {
+      target.classList.remove('is-scrolling');
+    }, 800); // the scrollbar fades out 800ms after you stop scrolling
+  };
 
   return (
     <div className="h-screen bg-background relative overflow-hidden flex flex-col">
@@ -98,7 +111,7 @@ const Index = () => {
 
         {/* Rush Cards View */}
         {view === "rush" && (
-          <div className="rush-scroll">
+          <div className="rush-scroll" onScroll={handleScroll}>
             <div className="rush-grid">
               <div className="rush-card-wrap">
                 <RushCard minutes={1} variant="blue" initialSeconds={34} jackpot={10000} leaderboard={leaderboardData} />
@@ -115,7 +128,7 @@ const Index = () => {
 
         {/* Tournament View */}
         {view === "tournament" && (
-          <div className="flex-1 min-h-0 overflow-y-auto max-w-6xl mx-auto px-2 sm:px-4 pb-4 w-full">
+          <div className="flex-1 min-h-0 overflow-y-auto max-w-6xl mx-auto px-2 sm:px-4 pb-4 w-full" onScroll={handleScroll}>
             <TournamentHeader minutes={tournamentMinutes} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6 mt-4">
